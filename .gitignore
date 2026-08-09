@@ -1,14 +1,18 @@
-# Laravel
-backend/.env
-backend/vendor/
-backend/storage/*.key
+# Laravel backend
+laravel-backend/.env
+laravel-backend/vendor/
+laravel-backend/storage/*.key
 
-# React
+# Laravel logs
+laravel-backend/storage/logs/*
+
+# React frontend
 frontend/node_modules/
 frontend/dist/
 
 # Environment files
 .env
+*.env
 
 # IDE
 .vscode/
@@ -17,3 +21,7 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Temporary Microsoft Office files
+~$*
+*.tmp
