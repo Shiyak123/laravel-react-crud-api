@@ -15,6 +15,8 @@ import {
 
 function Students() {
 
+    const navigate = useNavigate();
+
 
     const [students, setStudents] = useState([]);
 
@@ -35,7 +37,6 @@ function Students() {
         navigate("/login");
 
     };
-
 
 
     // Fetch students from Laravel API
@@ -85,7 +86,6 @@ function Students() {
     };
 
 
-
     // Delete student
     const handleDelete = async (id) => {
 
@@ -119,6 +119,7 @@ function Students() {
                     );
 
                 }
+
                 else {
 
                     setError(
@@ -140,7 +141,6 @@ function Students() {
     };
 
 
-
     // Load students when page opens
     useEffect(() => {
 
@@ -149,30 +149,18 @@ function Students() {
     }, []);
 
 
-
-
     return (
 
         <div>
-
 
             <h1>
                 Student Management System
             </h1>
 
 
-
             <button onClick={handleLogout}>
                 Logout
             </button>
-
-            {error && (
-                <p>
-                    {error}
-                </p>
-            )}
-
-
 
 
             <StudentForm
@@ -184,12 +172,9 @@ function Students() {
             />
 
 
-
-
             <h2>
                 Student List
             </h2>
-
 
 
             {/* Error message */}
@@ -197,20 +182,16 @@ function Students() {
             {error && (
 
                 <p>
-
                     {error}
-
                 </p>
 
             )}
-
 
 
             <table
                 border="1"
                 cellPadding="10"
             >
-
 
                 <thead>
 
@@ -231,19 +212,14 @@ function Students() {
                 </thead>
 
 
-
-
                 <tbody>
-
 
                     {loading ? (
 
                         <tr>
 
                             <td colSpan="5">
-
                                 Loading students...
-
                             </td>
 
                         </tr>
@@ -255,9 +231,7 @@ function Students() {
                             <tr>
 
                                 <td colSpan="5">
-
                                     No students found.
-
                                 </td>
 
                             </tr>
@@ -270,52 +244,40 @@ function Students() {
 
                                     <tr key={student.id}>
 
-
                                         <td>
                                             {student.id}
                                         </td>
-
 
                                         <td>
                                             {student.name}
                                         </td>
 
-
                                         <td>
                                             {student.email}
                                         </td>
-
 
                                         <td>
                                             {student.course}
                                         </td>
 
-
-
                                         <td>
 
-
                                             <button
-
                                                 onClick={() =>
-                                                    setSelectedStudent(
-                                                        student
-                                                    )
+                                                    setSelectedStudent(student)
                                                 }
-
                                             >
-
                                                 Edit
-
                                             </button>
-
 
 
                                             <button
                                                 onClick={() =>
                                                     handleDelete(student.id)
                                                 }
-                                                disabled={deletingId === student.id}
+                                                disabled={
+                                                    deletingId === student.id
+                                                }
                                             >
                                                 {deletingId === student.id
                                                     ? "Deleting..."
@@ -324,20 +286,15 @@ function Students() {
 
                                         </td>
 
-
                                     </tr>
 
                                 ))
 
                             )}
 
-
                 </tbody>
 
-
             </table>
-
-
 
         </div>
 
@@ -347,3 +304,4 @@ function Students() {
 
 
 export default Students;
+
