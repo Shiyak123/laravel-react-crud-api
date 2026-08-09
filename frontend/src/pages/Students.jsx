@@ -16,17 +16,15 @@ import {
 function Students() {
 
 
-    const navigate = useNavigate();
-
-
     const [students, setStudents] = useState([]);
 
     const [selectedStudent, setSelectedStudent] = useState(null);
 
     const [loading, setLoading] = useState(false);
 
-    const [error, setError] = useState("");
+    const [deletingId, setDeletingId] = useState(null);
 
+    const [error, setError] = useState("");
 
 
     // Logout Function
@@ -91,19 +89,21 @@ function Students() {
     // Delete student
     const handleDelete = async (id) => {
 
-
         if (
             confirm(
                 "Are you sure you want to delete this student?"
             )
         ) {
 
-
             try {
+
+                setDeletingId(id);
+
+                setError("");
 
                 await deleteStudent(id);
 
-                loadStudents();
+                await loadStudents();
 
             }
 
@@ -126,6 +126,12 @@ function Students() {
                     );
 
                 }
+
+            }
+
+            finally {
+
+                setDeletingId(null);
 
             }
 
@@ -306,19 +312,15 @@ function Students() {
 
 
                                             <button
-
                                                 onClick={() =>
-                                                    handleDelete(
-                                                        student.id
-                                                    )
+                                                    handleDelete(student.id)
                                                 }
-
+                                                disabled={deletingId === student.id}
                                             >
-
-                                                Delete
-
+                                                {deletingId === student.id
+                                                    ? "Deleting..."
+                                                    : "Delete"}
                                             </button>
-
 
                                         </td>
 
