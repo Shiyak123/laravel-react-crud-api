@@ -20,6 +20,8 @@ function Students() {
 
     const [students, setStudents] = useState([]);
 
+    const [search, setSearch] = useState("");
+
     const [selectedStudent, setSelectedStudent] = useState(null);
 
     const [loading, setLoading] = useState(false);
@@ -149,6 +151,28 @@ function Students() {
     }, []);
 
 
+    // Filter students based on search
+    const filteredStudents = students.filter((student) => {
+
+        return (
+
+            student.name
+                .toLowerCase()
+                .includes(search.toLowerCase()) ||
+
+            student.email
+                .toLowerCase()
+                .includes(search.toLowerCase()) ||
+
+            student.course
+                .toLowerCase()
+                .includes(search.toLowerCase())
+
+        );
+
+    });
+
+
     return (
 
         <div>
@@ -179,6 +203,23 @@ function Students() {
             <h2>
                 Student List
             </h2>
+
+
+            {/* Search */}
+
+            <input
+
+                type="text"
+
+                placeholder="Search by name, email or course"
+
+                value={search}
+
+                onChange={(e) =>
+                    setSearch(e.target.value)
+                }
+
+            />
 
 
             {/* Error message */}
@@ -230,12 +271,16 @@ function Students() {
 
                     )
 
-                        : students.length === 0 ? (
+                        : filteredStudents.length === 0 ? (
 
                             <tr>
 
                                 <td colSpan="5">
-                                    No students found.
+
+                                    {search
+                                        ? "No matching students found."
+                                        : "No students found."}
+
                                 </td>
 
                             </tr>
@@ -244,7 +289,7 @@ function Students() {
 
                             : (
 
-                                students.map(student => (
+                                filteredStudents.map(student => (
 
                                     <tr key={student.id}>
 
@@ -267,25 +312,34 @@ function Students() {
                                         <td>
 
                                             <button
+
                                                 onClick={() =>
                                                     setSelectedStudent(student)
                                                 }
+
                                             >
                                                 Edit
                                             </button>
 
 
                                             <button
+
                                                 onClick={() =>
                                                     handleDelete(student.id)
                                                 }
+
                                                 disabled={
                                                     deletingId === student.id
                                                 }
+
                                             >
+
                                                 {deletingId === student.id
+
                                                     ? "Deleting..."
+
                                                     : "Delete"}
+
                                             </button>
 
                                         </td>
