@@ -187,10 +187,35 @@ function StudentForm({
 
             if (error.response) {
 
-                setError(
-                    error.response.data.message ||
-                    "Failed to save student."
-                );
+                if (error.response.status === 422) {
+
+                    const validationErrors =
+                        error.response.data.errors;
+
+                    if (validationErrors) {
+
+                        const firstError =
+                            Object.values(validationErrors)[0][0];
+
+                        setError(firstError);
+
+                    }
+                    else {
+
+                        setError("Please check your input.");
+
+                    }
+
+                }
+
+                else {
+
+                    setError(
+                        error.response.data.message ||
+                        "Failed to save student."
+                    );
+
+                }
 
             }
 
