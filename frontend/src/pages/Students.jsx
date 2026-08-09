@@ -111,9 +111,21 @@ function Students() {
 
                 console.log(error);
 
-                setError(
-                    "Failed to delete student."
-                );
+                if (error.response) {
+
+                    setError(
+                        error.response.data.message ||
+                        "Failed to delete student."
+                    );
+
+                }
+                else {
+
+                    setError(
+                        "Unable to connect to the server."
+                    );
+
+                }
 
             }
 
@@ -145,10 +157,14 @@ function Students() {
 
 
             <button onClick={handleLogout}>
-
                 Logout
-
             </button>
+
+            {error && (
+                <p>
+                    {error}
+                </p>
+            )}
 
 
 

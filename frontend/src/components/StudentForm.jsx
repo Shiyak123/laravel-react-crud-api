@@ -152,7 +152,7 @@ function StudentForm({ refreshStudents, selectedStudent }) {
 
                 setError(
                     error.response.data.message ||
-                    "Something went wrong."
+                    "Failed to save student."
                 );
 
             }
