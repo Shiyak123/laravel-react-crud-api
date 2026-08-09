@@ -169,6 +169,10 @@ function Students() {
 
                 selectedStudent={selectedStudent}
 
+                clearSelectedStudent={() =>
+                    setSelectedStudent(null)
+                }
+
             />
 
 

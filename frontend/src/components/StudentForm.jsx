@@ -1,13 +1,16 @@
-
 import { useState, useEffect } from "react";
+
 import {
     createStudent,
     updateStudent
 } from "../services/studentService";
 
 
-function StudentForm({ refreshStudents, selectedStudent }) {
-
+function StudentForm({
+    refreshStudents,
+    selectedStudent,
+    clearSelectedStudent
+}) {
 
     const [student, setStudent] = useState({
 
@@ -23,7 +26,6 @@ function StudentForm({ refreshStudents, selectedStudent }) {
     const [loading, setLoading] = useState(false);
 
 
-
     useEffect(() => {
 
         if (selectedStudent) {
@@ -33,7 +35,6 @@ function StudentForm({ refreshStudents, selectedStudent }) {
         }
 
     }, [selectedStudent]);
-
 
 
     const handleChange = (e) => {
@@ -46,11 +47,9 @@ function StudentForm({ refreshStudents, selectedStudent }) {
 
         });
 
-        // Clear previous error
         setError("");
 
     };
-
 
 
     const handleSubmit = async (e) => {
@@ -96,21 +95,16 @@ function StudentForm({ refreshStudents, selectedStudent }) {
         }
 
 
-
         try {
 
-            // Start loading
             setLoading(true);
 
 
             if (selectedStudent) {
 
                 await updateStudent(
-
                     selectedStudent.id,
-
                     student
-
                 );
 
                 alert("Student updated successfully");
@@ -126,7 +120,6 @@ function StudentForm({ refreshStudents, selectedStudent }) {
             }
 
 
-
             setStudent({
 
                 name: "",
@@ -139,10 +132,18 @@ function StudentForm({ refreshStudents, selectedStudent }) {
             setError("");
 
 
-            refreshStudents();
+            // Clear edit mode after update
+            if (selectedStudent) {
 
+                clearSelectedStudent();
+
+            }
+
+
+            await refreshStudents();
 
         }
+
 
         catch (error) {
 
@@ -156,6 +157,7 @@ function StudentForm({ refreshStudents, selectedStudent }) {
                 );
 
             }
+
             else {
 
                 setError(
@@ -165,9 +167,10 @@ function StudentForm({ refreshStudents, selectedStudent }) {
             }
 
         }
+
+
         finally {
 
-            // Stop loading
             setLoading(false);
 
         }
@@ -175,11 +178,27 @@ function StudentForm({ refreshStudents, selectedStudent }) {
     };
 
 
+    // Cancel editing
+    const handleCancel = () => {
+
+        setStudent({
+
+            name: "",
+            email: "",
+            course: ""
+
+        });
+
+        setError("");
+
+        clearSelectedStudent();
+
+    };
+
 
     return (
 
         <form onSubmit={handleSubmit}>
-
 
             <h2>
 
@@ -190,17 +209,13 @@ function StudentForm({ refreshStudents, selectedStudent }) {
             </h2>
 
 
-
             {error && (
 
                 <p>
-
                     {error}
-
                 </p>
 
             )}
-
 
 
             <input
@@ -214,7 +229,6 @@ function StudentForm({ refreshStudents, selectedStudent }) {
                 onChange={handleChange}
 
             />
-
 
 
             <input
@@ -232,7 +246,6 @@ function StudentForm({ refreshStudents, selectedStudent }) {
             />
 
 
-
             <input
 
                 name="course"
@@ -246,7 +259,6 @@ function StudentForm({ refreshStudents, selectedStudent }) {
             />
 
 
-
             <button
 
                 type="submit"
@@ -256,17 +268,31 @@ function StudentForm({ refreshStudents, selectedStudent }) {
             >
 
                 {loading
-
                     ? "Saving..."
-
                     : selectedStudent
-
                         ? "Update"
-
                         : "Save"}
 
             </button>
 
+
+            {selectedStudent && (
+
+                <button
+
+                    type="button"
+
+                    onClick={handleCancel}
+
+                    disabled={loading}
+
+                >
+
+                    Cancel
+
+                </button>
+
+            )}
 
         </form>
 
