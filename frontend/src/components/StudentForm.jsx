@@ -68,6 +68,17 @@ function StudentForm({
         }
 
 
+        if (student.name.trim().length < 2) {
+
+            setError(
+                "Name must be at least 2 characters"
+            );
+
+            return;
+
+        }
+
+
         if (!student.email.trim()) {
 
             setError("Email is required");
@@ -77,7 +88,13 @@ function StudentForm({
         }
 
 
-        if (!student.email.includes("@")) {
+        // Email validation
+
+        const emailPattern =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+        if (!emailPattern.test(student.email)) {
 
             setError("Please enter a valid email");
 
@@ -89,6 +106,17 @@ function StudentForm({
         if (!student.course.trim()) {
 
             setError("Course is required");
+
+            return;
+
+        }
+
+
+        if (student.course.trim().length < 2) {
+
+            setError(
+                "Course must be at least 2 characters"
+            );
 
             return;
 
@@ -107,7 +135,9 @@ function StudentForm({
                     student
                 );
 
-                alert("Student updated successfully");
+                alert(
+                    "Student updated successfully"
+                );
 
             }
 
@@ -115,10 +145,14 @@ function StudentForm({
 
                 await createStudent(student);
 
-                alert("Student added successfully");
+                alert(
+                    "Student added successfully"
+                );
 
             }
 
+
+            // Clear form
 
             setStudent({
 
@@ -133,6 +167,7 @@ function StudentForm({
 
 
             // Clear edit mode after update
+
             if (selectedStudent) {
 
                 clearSelectedStudent();
@@ -148,6 +183,7 @@ function StudentForm({
         catch (error) {
 
             console.log(error);
+
 
             if (error.response) {
 
@@ -179,6 +215,7 @@ function StudentForm({
 
 
     // Cancel editing
+
     const handleCancel = () => {
 
         setStudent({
@@ -268,9 +305,13 @@ function StudentForm({
             >
 
                 {loading
+
                     ? "Saving..."
+
                     : selectedStudent
+
                         ? "Update"
+
                         : "Save"}
 
             </button>
