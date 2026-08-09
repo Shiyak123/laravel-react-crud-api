@@ -24,9 +24,27 @@ function Login() {
 
 
         // Frontend validation
+        // Frontend validation
+
         if (!email.trim()) {
 
             setError("Email is required");
+
+            return;
+
+        }
+
+        if (!email.includes("@")) {
+
+            setError("Please enter a valid email");
+
+            return;
+
+        }
+
+        if (!password.trim()) {
+
+            setError("Password is required");
 
             return;
 
