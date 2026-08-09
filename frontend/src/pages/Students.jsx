@@ -207,19 +207,51 @@ function Students() {
 
             {/* Search */}
 
-            <input
+            <div>
 
-                type="text"
+                <input
 
-                placeholder="Search by name, email or course"
+                    type="text"
 
-                value={search}
+                    placeholder="Search by name, email or course"
 
-                onChange={(e) =>
-                    setSearch(e.target.value)
-                }
+                    value={search}
 
-            />
+                    onChange={(e) =>
+                        setSearch(e.target.value)
+                    }
+
+                />
+
+
+                <button
+
+                    type="button"
+
+                    onClick={() =>
+                        setSearch(search.trim())
+                    }
+
+                >
+                    Search
+
+                </button>
+
+
+                <button
+
+                    type="button"
+
+                    onClick={() =>
+                        setSearch("")
+                    }
+
+                >
+                    Clear
+
+                </button>
+
+            </div>
 
 
             {/* Error message */}
@@ -335,9 +367,7 @@ function Students() {
                                             >
 
                                                 {deletingId === student.id
-
                                                     ? "Deleting..."
-
                                                     : "Delete"}
 
                                             </button>
