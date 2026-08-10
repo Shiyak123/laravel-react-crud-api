@@ -11,4 +11,3 @@ class DatabaseSeeder extends Seeder
     {
         Student::factory(1000)->create();
     }
-}
