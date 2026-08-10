@@ -17,25 +17,19 @@ function Students() {
     const navigate = useNavigate();
 
     const [students, setStudents] = useState([]);
-
     const [currentPage, setCurrentPage] = useState(1);
-
     const [totalPages, setTotalPages] = useState(1);
 
-    const studentsPerPage = 10;
+    const [searchInput, setSearchInput] = useState("");
+    const [appliedSearch, setAppliedSearch] = useState("");
 
-    const [search, setSearch] = useState("");
-    const [searchQuery, setSearchQuery] = useState("");
     const [selectedStudent, setSelectedStudent] = useState(null);
-
     const [loading, setLoading] = useState(false);
-
     const [deletingId, setDeletingId] = useState(null);
-
     const [error, setError] = useState("");
 
 
-    // Logout Function
+    // Logout
     const handleLogout = () => {
 
         logoutUser();
@@ -45,8 +39,11 @@ function Students() {
     };
 
 
-    // Fetch students from Laravel API
-    const loadStudents = async (page = currentPage) => {
+    // Load students from Laravel API
+    const loadStudents = async (
+        page = currentPage,
+        searchValue = appliedSearch
+    ) => {
 
         try {
 
@@ -54,13 +51,15 @@ function Students() {
 
             setError("");
 
-            const response =
-                await getStudents(page, searchQuery);
+            const response = await getStudents(
+                page,
+                searchValue
+            );
 
-            // Laravel pagination returns students inside data.data
             setStudents(response.data.data);
 
-            // Laravel provides the total number of pages
+            setCurrentPage(response.data.current_page);
+
             setTotalPages(response.data.last_page);
 
         }
@@ -97,6 +96,17 @@ function Students() {
     };
 
 
+    // Load students when page or search changes
+    useEffect(() => {
+
+        loadStudents(
+            currentPage,
+            appliedSearch
+        );
+
+    }, [currentPage, appliedSearch]);
+
+
     // Delete student
     const handleDelete = async (id) => {
 
@@ -114,7 +124,10 @@ function Students() {
 
                 await deleteStudent(id);
 
-                await loadStudents(currentPage);
+                await loadStudents(
+                    currentPage,
+                    appliedSearch
+                );
 
             }
 
@@ -152,12 +165,28 @@ function Students() {
     };
 
 
-    // Load students when page opens
-    useEffect(() => {
+    // Search
+    const handleSearch = () => {
 
-        loadStudents(currentPage);
+        setCurrentPage(1);
 
-    }, [currentPage, searchQuery]);
+        setAppliedSearch(
+            searchInput.trim()
+        );
+
+    };
+
+
+    // Clear search
+    const handleClear = () => {
+
+        setSearchInput("");
+
+        setAppliedSearch("");
+
+        setCurrentPage(1);
+
+    };
 
 
     // Change page
@@ -184,18 +213,27 @@ function Students() {
             </h1>
 
 
+            {/* Logout */}
+
             <button onClick={handleLogout}>
                 Logout
             </button>
 
 
+            {/* Student Form */}
+
             <StudentForm
 
                 refreshStudents={() =>
-                    loadStudents(currentPage)
+                    loadStudents(
+                        currentPage,
+                        appliedSearch
+                    )
                 }
 
-                selectedStudent={selectedStudent}
+                selectedStudent={
+                    selectedStudent
+                }
 
                 clearSelectedStudent={() =>
                     setSelectedStudent(null)
@@ -219,52 +257,44 @@ function Students() {
 
                     placeholder="Search by name, email or course"
 
-                    value={search}
+                    value={searchInput}
 
-                    onChange={(e) => {
-
-                        setSearch(e.target.value);
-
-                        setCurrentPage(1);
-
-                    }}
+                    onChange={(e) =>
+                        setSearchInput(
+                            e.target.value
+                        )
+                    }
 
                 />
 
 
                 <button
+
                     type="button"
-                    onClick={() => {
 
-                        setSearchQuery(search.trim());
+                    onClick={handleSearch}
 
-                        setCurrentPage(1);
-
-                    }}
                 >
                     Search
+
                 </button>
 
 
                 <button
+
                     type="button"
-                    onClick={() => {
 
-                        setSearch("");
+                    onClick={handleClear}
 
-                        setSearchQuery("");
-
-                        setCurrentPage(1);
-
-                    }}
                 >
                     Clear
+
                 </button>
 
             </div>
 
 
-            {/* Error message */}
+            {/* Error */}
 
             {error && (
 
@@ -321,7 +351,7 @@ function Students() {
 
                                 <td colSpan="5">
 
-                                    {search
+                                    {appliedSearch
                                         ? "No matching students found."
                                         : "No students found."}
 
@@ -358,7 +388,9 @@ function Students() {
                                             <button
 
                                                 onClick={() =>
-                                                    setSelectedStudent(student)
+                                                    setSelectedStudent(
+                                                        student
+                                                    )
                                                 }
 
                                             >
@@ -369,17 +401,23 @@ function Students() {
                                             <button
 
                                                 onClick={() =>
-                                                    handleDelete(student.id)
+                                                    handleDelete(
+                                                        student.id
+                                                    )
                                                 }
 
                                                 disabled={
-                                                    deletingId === student.id
+                                                    deletingId ===
+                                                    student.id
                                                 }
 
                                             >
 
-                                                {deletingId === student.id
+                                                {deletingId ===
+                                                    student.id
+
                                                     ? "Deleting..."
+
                                                     : "Delete"}
 
                                             </button>
@@ -406,19 +444,26 @@ function Students() {
                     type="button"
 
                     onClick={() =>
-                        handlePageChange(currentPage - 1)
+                        handlePageChange(
+                            currentPage - 1
+                        )
                     }
 
-                    disabled={currentPage === 1}
+                    disabled={
+                        currentPage === 1
+                    }
 
                 >
                     Previous
-
                 </button>
 
 
                 {Array.from(
-                    { length: totalPages },
+
+                    {
+                        length: totalPages
+                    },
+
                     (_, index) => (
 
                         <button
@@ -428,11 +473,14 @@ function Students() {
                             key={index + 1}
 
                             onClick={() =>
-                                handlePageChange(index + 1)
+                                handlePageChange(
+                                    index + 1
+                                )
                             }
 
                             disabled={
-                                currentPage === index + 1
+                                currentPage ===
+                                index + 1
                             }
 
                         >
@@ -442,6 +490,7 @@ function Students() {
                         </button>
 
                     )
+
                 )}
 
 
@@ -450,7 +499,9 @@ function Students() {
                     type="button"
 
                     onClick={() =>
-                        handlePageChange(currentPage + 1)
+                        handlePageChange(
+                            currentPage + 1
+                        )
                     }
 
                     disabled={
@@ -460,7 +511,6 @@ function Students() {
 
                 >
                     Next
-
                 </button>
 
             </div>
@@ -469,7 +519,9 @@ function Students() {
             {/* Page Information */}
 
             <p>
+
                 Page {currentPage} of {totalPages}
+
             </p>
 
         </div>
@@ -479,4 +531,3 @@ function Students() {
 }
 
 export default Students;
-
