@@ -10,10 +10,30 @@ use Illuminate\Validation\Rule;
 class StudentController extends Controller
 {
     // Read all students
-    public function index()
-    {
-        return Student::all();
+ public function index(Request $request)
+{
+    $perPage = 10;
+
+    $search = $request->query('search');
+
+    $students = Student::query();
+
+    if ($search) {
+
+        $students->where(function ($query) use ($search) {
+
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('course', 'like', "%{$search}%");
+
+        });
+
     }
+
+    return response()->json(
+        $students->paginate($perPage)
+    );
+}
 
 
     // Create a student
