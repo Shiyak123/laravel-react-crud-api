@@ -12,13 +12,15 @@ import {
     logoutUser
 } from "../services/authService";
 
-
 function Students() {
 
     const navigate = useNavigate();
 
-
     const [students, setStudents] = useState([]);
+
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const studentsPerPage = 10;
 
     const [search, setSearch] = useState("");
 
@@ -173,6 +175,26 @@ function Students() {
     });
 
 
+    // Calculate total number of pages
+    const totalPages = Math.ceil(
+        filteredStudents.length / studentsPerPage
+    );
+
+
+    // Calculate students for current page
+    const indexOfLastStudent =
+        currentPage * studentsPerPage;
+
+    const indexOfFirstStudent =
+        indexOfLastStudent - studentsPerPage;
+
+    const currentStudents =
+        filteredStudents.slice(
+            indexOfFirstStudent,
+            indexOfLastStudent
+        );
+
+
     return (
 
         <div>
@@ -217,9 +239,13 @@ function Students() {
 
                     value={search}
 
-                    onChange={(e) =>
-                        setSearch(e.target.value)
-                    }
+                    onChange={(e) => {
+
+                        setSearch(e.target.value);
+
+                        setCurrentPage(1);
+
+                    }}
 
                 />
 
@@ -242,9 +268,13 @@ function Students() {
 
                     type="button"
 
-                    onClick={() =>
-                        setSearch("")
-                    }
+                    onClick={() => {
+
+                        setSearch("");
+
+                        setCurrentPage(1);
+
+                    }}
 
                 >
                     Clear
@@ -321,7 +351,7 @@ function Students() {
 
                             : (
 
-                                filteredStudents.map(student => (
+                                currentStudents.map((student) => (
 
                                     <tr key={student.id}>
 
@@ -384,12 +414,80 @@ function Students() {
 
             </table>
 
+
+            {/* Pagination */}
+
+            <div>
+
+                <button
+
+                    type="button"
+
+                    onClick={() =>
+                        setCurrentPage(currentPage - 1)
+                    }
+
+                    disabled={currentPage === 1}
+
+                >
+                    Previous
+
+                </button>
+
+
+                {Array.from(
+                    { length: totalPages },
+                    (_, index) => (
+
+                        <button
+
+                            type="button"
+
+                            key={index + 1}
+
+                            onClick={() =>
+                                setCurrentPage(index + 1)
+                            }
+
+                            disabled={
+                                currentPage === index + 1
+                            }
+
+                        >
+
+                            {index + 1}
+
+                        </button>
+
+                    )
+                )}
+
+
+                <button
+
+                    type="button"
+
+                    onClick={() =>
+                        setCurrentPage(currentPage + 1)
+                    }
+
+                    disabled={
+                        currentPage === totalPages ||
+                        totalPages === 0
+                    }
+
+                >
+                    Next
+
+                </button>
+
+            </div>
+
         </div>
 
     );
 
 }
-
 
 export default Students;
 
