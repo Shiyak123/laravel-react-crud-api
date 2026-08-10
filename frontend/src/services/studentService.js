@@ -3,8 +3,10 @@ import api from "./api";
 const API_URL = "http://127.0.0.1:8000/api/students";
 
 // Get all students
-export const getStudents = () => {
-    return api.get("/students");
+export const getStudents = (page = 1, search = "") => {
+    return api.get(
+        `/students?page=${page}&search=${encodeURIComponent(search)}`
+    );
 };
 
 // Get one student

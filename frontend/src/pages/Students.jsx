@@ -20,10 +20,12 @@ function Students() {
 
     const [currentPage, setCurrentPage] = useState(1);
 
+    const [totalPages, setTotalPages] = useState(1);
+
     const studentsPerPage = 10;
 
     const [search, setSearch] = useState("");
-
+    const [searchQuery, setSearchQuery] = useState("");
     const [selectedStudent, setSelectedStudent] = useState(null);
 
     const [loading, setLoading] = useState(false);
@@ -44,7 +46,7 @@ function Students() {
 
 
     // Fetch students from Laravel API
-    const loadStudents = async () => {
+    const loadStudents = async (page = currentPage) => {
 
         try {
 
@@ -52,9 +54,14 @@ function Students() {
 
             setError("");
 
-            const response = await getStudents();
+            const response =
+                await getStudents(page, searchQuery);
 
-            setStudents(response.data);
+            // Laravel pagination returns students inside data.data
+            setStudents(response.data.data);
+
+            // Laravel provides the total number of pages
+            setTotalPages(response.data.last_page);
 
         }
 
@@ -107,7 +114,7 @@ function Students() {
 
                 await deleteStudent(id);
 
-                await loadStudents();
+                await loadStudents(currentPage);
 
             }
 
@@ -148,51 +155,24 @@ function Students() {
     // Load students when page opens
     useEffect(() => {
 
-        loadStudents();
+        loadStudents(currentPage);
 
-    }, []);
-
-
-    // Filter students based on search
-    const filteredStudents = students.filter((student) => {
-
-        return (
-
-            student.name
-                .toLowerCase()
-                .includes(search.toLowerCase()) ||
-
-            student.email
-                .toLowerCase()
-                .includes(search.toLowerCase()) ||
-
-            student.course
-                .toLowerCase()
-                .includes(search.toLowerCase())
-
-        );
-
-    });
+    }, [currentPage, searchQuery]);
 
 
-    // Calculate total number of pages
-    const totalPages = Math.ceil(
-        filteredStudents.length / studentsPerPage
-    );
+    // Change page
+    const handlePageChange = (page) => {
 
+        if (
+            page >= 1 &&
+            page <= totalPages
+        ) {
 
-    // Calculate students for current page
-    const indexOfLastStudent =
-        currentPage * studentsPerPage;
+            setCurrentPage(page);
 
-    const indexOfFirstStudent =
-        indexOfLastStudent - studentsPerPage;
+        }
 
-    const currentStudents =
-        filteredStudents.slice(
-            indexOfFirstStudent,
-            indexOfLastStudent
-        );
+    };
 
 
     return (
@@ -211,7 +191,9 @@ function Students() {
 
             <StudentForm
 
-                refreshStudents={loadStudents}
+                refreshStudents={() =>
+                    loadStudents(currentPage)
+                }
 
                 selectedStudent={selectedStudent}
 
@@ -251,34 +233,32 @@ function Students() {
 
 
                 <button
-
                     type="button"
-
-                    onClick={() =>
-                        setSearch(search.trim())
-                    }
-
-                >
-                    Search
-
-                </button>
-
-
-                <button
-
-                    type="button"
-
                     onClick={() => {
 
-                        setSearch("");
+                        setSearchQuery(search.trim());
 
                         setCurrentPage(1);
 
                     }}
+                >
+                    Search
+                </button>
 
+
+                <button
+                    type="button"
+                    onClick={() => {
+
+                        setSearch("");
+
+                        setSearchQuery("");
+
+                        setCurrentPage(1);
+
+                    }}
                 >
                     Clear
-
                 </button>
 
             </div>
@@ -294,6 +274,8 @@ function Students() {
 
             )}
 
+
+            {/* Students Table */}
 
             <table
                 border="1"
@@ -333,7 +315,7 @@ function Students() {
 
                     )
 
-                        : filteredStudents.length === 0 ? (
+                        : students.length === 0 ? (
 
                             <tr>
 
@@ -351,7 +333,7 @@ function Students() {
 
                             : (
 
-                                currentStudents.map((student) => (
+                                students.map((student) => (
 
                                     <tr key={student.id}>
 
@@ -424,7 +406,7 @@ function Students() {
                     type="button"
 
                     onClick={() =>
-                        setCurrentPage(currentPage - 1)
+                        handlePageChange(currentPage - 1)
                     }
 
                     disabled={currentPage === 1}
@@ -446,7 +428,7 @@ function Students() {
                             key={index + 1}
 
                             onClick={() =>
-                                setCurrentPage(index + 1)
+                                handlePageChange(index + 1)
                             }
 
                             disabled={
@@ -468,7 +450,7 @@ function Students() {
                     type="button"
 
                     onClick={() =>
-                        setCurrentPage(currentPage + 1)
+                        handlePageChange(currentPage + 1)
                     }
 
                     disabled={
@@ -482,6 +464,13 @@ function Students() {
                 </button>
 
             </div>
+
+
+            {/* Page Information */}
+
+            <p>
+                Page {currentPage} of {totalPages}
+            </p>
 
         </div>
 
