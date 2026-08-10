@@ -2,206 +2,225 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/authService";
 
-
 function Login() {
-
     const [email, setEmail] = useState("");
-
     const [password, setPassword] = useState("");
-
     const [error, setError] = useState("");
-
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const navigate = useNavigate();
 
-
     const handleLogin = async (e) => {
-
         e.preventDefault();
-
         setError("");
 
-
-        // Frontend validation
-        // Frontend validation
-
         if (!email.trim()) {
-
             setError("Email is required");
-
             return;
-
         }
 
         if (!email.includes("@")) {
-
             setError("Please enter a valid email");
-
             return;
-
         }
 
         if (!password.trim()) {
-
             setError("Password is required");
-
             return;
-
         }
-
-
-        if (!password.trim()) {
-
-            setError("Password is required");
-
-            return;
-
-        }
-
 
         try {
-
             setLoading(true);
 
-
             const response = await loginUser({
-
                 email,
-                password
-
+                password,
             });
 
-
-            // Save JWT token
             localStorage.setItem(
                 "token",
                 response.data.token
             );
 
-
-            console.log("Login successful");
-
-
-            // Go to Students page
             navigate("/students");
-
-        }
-
-
-        catch (error) {
-
+        } catch (error) {
             console.log(error);
 
-
             if (error.response) {
-
                 setError(
                     error.response.data.message ||
-                    "Login failed."
+                    "Invalid email or password."
                 );
-
-            }
-
-            else {
-
+            } else {
                 setError(
                     "Unable to connect to the server."
                 );
-
             }
-
-        }
-
-
-        finally {
-
+        } finally {
             setLoading(false);
-
         }
-
     };
 
-
     return (
+        <div className="login-page">
+            <div className="login-container">
 
-        <form onSubmit={handleLogin}>
+                {/* Left Branding Section */}
+                <div className="login-brand">
 
-            <h2>
-                Login
-            </h2>
+                    <div className="brand-icon">
+                        🎓
+                    </div>
 
+                    <h1>
+                        Student Management
+                    </h1>
 
-            {/* Error message */}
+                    <p>
+                        Manage students efficiently,
+                        securely, and effortlessly.
+                    </p>
 
-            {error && (
+                    <div className="brand-features">
+                        <div>
+                            <span>✓</span>
+                            Easy student management
+                        </div>
 
-                <p>
-                    {error}
-                </p>
+                        <div>
+                            <span>✓</span>
+                            Secure authentication
+                        </div>
 
-            )}
+                        <div>
+                            <span>✓</span>
+                            Fast and reliable
+                        </div>
+                    </div>
 
+                </div>
 
-            <input
+                {/* Login Card */}
+                <div className="login-card">
 
-                type="email"
+                    <div className="login-header">
 
-                placeholder="Email"
+                        <h2>
+                            Welcome Back
+                        </h2>
 
-                value={email}
+                        <p>
+                            Sign in to your account
+                            to continue
+                        </p>
 
-                onChange={(e) => {
+                    </div>
 
-                    setEmail(e.target.value);
+                    {error && (
+                        <div className="login-error">
+                            <span>⚠</span>
+                            {error}
+                        </div>
+                    )}
 
-                    setError("");
+                    <form onSubmit={handleLogin}>
 
-                }}
+                        {/* Email */}
+                        <div className="form-group">
 
-            />
+                            <label htmlFor="email">
+                                Email Address
+                            </label>
 
+                            <input
+                                id="email"
+                                type="email"
+                                placeholder="Enter your email"
+                                value={email}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    setError("");
+                                }}
+                                disabled={loading}
+                            />
 
-            <input
+                        </div>
 
-                type="password"
+                        {/* Password */}
+                        <div className="form-group">
 
-                placeholder="Password"
+                            <label htmlFor="password">
+                                Password
+                            </label>
 
-                value={password}
+                            <div className="password-wrapper">
 
-                onChange={(e) => {
+                                <input
+                                    id="password"
+                                    type={
+                                        showPassword
+                                            ? "text"
+                                            : "password"
+                                    }
+                                    placeholder="Enter your password"
+                                    value={password}
+                                    onChange={(e) => {
+                                        setPassword(
+                                            e.target.value
+                                        );
+                                        setError("");
+                                    }}
+                                    disabled={loading}
+                                />
 
-                    setPassword(e.target.value);
+                                <button
+                                    type="button"
+                                    className="password-toggle"
+                                    onClick={() =>
+                                        setShowPassword(
+                                            !showPassword
+                                        )
+                                    }
+                                    disabled={loading}
+                                >
+                                    {showPassword
+                                        ? "Hide"
+                                        : "Show"}
+                                </button>
 
-                    setError("");
+                            </div>
 
-                }}
+                        </div>
 
-            />
+                        {/* Login Button */}
+                        <button
+                            type="submit"
+                            className="login-button"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="spinner"></span>
+                                    Signing in...
+                                </>
+                            ) : (
+                                "Sign In"
+                            )}
+                        </button>
 
+                    </form>
 
-            <button
+                    <p className="login-footer">
+                        Student Management System
+                    </p>
 
-                type="submit"
+                </div>
 
-                disabled={loading}
-
-            >
-
-                {loading
-                    ? "Logging in..."
-                    : "Login"}
-
-            </button>
-
-
-        </form>
-
+            </div>
+        </div>
     );
-
 }
-
 
 export default Login;
 

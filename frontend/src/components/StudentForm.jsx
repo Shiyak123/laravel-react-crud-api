@@ -5,128 +5,87 @@ import {
     updateStudent
 } from "../services/studentService";
 
-
 function StudentForm({
     refreshStudents,
     selectedStudent,
     clearSelectedStudent
 }) {
 
-    const [student, setStudent] = useState({
 
+    const [student, setStudent] = useState({
         name: "",
         email: "",
         course: ""
-
     });
 
-
     const [error, setError] = useState("");
-
     const [loading, setLoading] = useState(false);
-
 
     useEffect(() => {
 
         if (selectedStudent) {
 
-            setStudent(selectedStudent);
+            setStudent({
+                name: selectedStudent.name || "",
+                email: selectedStudent.email || "",
+                course: selectedStudent.course || ""
+            });
 
         }
 
     }, [selectedStudent]);
 
-
     const handleChange = (e) => {
 
         setStudent({
-
             ...student,
-
             [e.target.name]: e.target.value
-
         });
 
         setError("");
 
     };
 
-
     const handleSubmit = async (e) => {
 
         e.preventDefault();
 
-
-        // Frontend validation
-
         if (!student.name.trim()) {
-
             setError("Name is required");
-
             return;
-
         }
-
 
         if (student.name.trim().length < 2) {
-
-            setError(
-                "Name must be at least 2 characters"
-            );
-
+            setError("Name must be at least 2 characters");
             return;
-
         }
-
 
         if (!student.email.trim()) {
-
             setError("Email is required");
-
             return;
-
         }
-
-
-        // Email validation
 
         const emailPattern =
             /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-
         if (!emailPattern.test(student.email)) {
-
             setError("Please enter a valid email");
-
             return;
-
         }
-
 
         if (!student.course.trim()) {
-
             setError("Course is required");
-
             return;
-
         }
-
 
         if (student.course.trim().length < 2) {
-
-            setError(
-                "Course must be at least 2 characters"
-            );
-
+            setError("Course must be at least 2 characters");
             return;
-
         }
-
 
         try {
 
             setLoading(true);
-
 
             if (selectedStudent) {
 
@@ -135,55 +94,29 @@ function StudentForm({
                     student
                 );
 
-                alert(
-                    "Student updated successfully"
-                );
-
-            }
-
-            else {
+            } else {
 
                 await createStudent(student);
 
-                alert(
-                    "Student added successfully"
-                );
-
             }
 
-
-            // Clear form
-
             setStudent({
-
                 name: "",
                 email: "",
                 course: ""
-
             });
-
 
             setError("");
 
-
-            // Clear edit mode after update
-
             if (selectedStudent) {
-
                 clearSelectedStudent();
-
             }
-
 
             await refreshStudents();
 
-        }
-
-
-        catch (error) {
+        } catch (error) {
 
             console.log(error);
-
 
             if (error.response) {
 
@@ -199,16 +132,15 @@ function StudentForm({
 
                         setError(firstError);
 
+                    } else {
+
+                        setError(
+                            "Please check your input."
+                        );
+
                     }
-                    else {
 
-                        setError("Please check your input.");
-
-                    }
-
-                }
-
-                else {
+                } else {
 
                     setError(
                         error.response.data.message ||
@@ -217,9 +149,7 @@ function StudentForm({
 
                 }
 
-            }
-
-            else {
+            } else {
 
                 setError(
                     "Unable to connect to the server."
@@ -227,10 +157,7 @@ function StudentForm({
 
             }
 
-        }
-
-
-        finally {
+        } finally {
 
             setLoading(false);
 
@@ -238,17 +165,12 @@ function StudentForm({
 
     };
 
-
-    // Cancel editing
-
     const handleCancel = () => {
 
         setStudent({
-
             name: "",
             email: "",
             course: ""
-
         });
 
         setError("");
@@ -257,115 +179,145 @@ function StudentForm({
 
     };
 
-
     return (
 
-        <form onSubmit={handleSubmit}>
+        <div className="student-form-wrapper">
 
-            <h2>
+            <div className="form-header">
 
-                {selectedStudent
-                    ? "Update Student"
-                    : "Add Student"}
+                <div className="form-icon">
+                    {selectedStudent ? "✏️" : "＋"}
+                </div>
 
-            </h2>
+                <div>
+
+                    <h2>
+                        {selectedStudent
+                            ? "Update Student"
+                            : "Add New Student"}
+                    </h2>
+
+                    <p>
+                        {selectedStudent
+                            ? "Update the student's information below."
+                            : "Enter the student's details to create a new record."}
+                    </p>
+
+                </div>
+
+            </div>
 
 
             {error && (
 
-                <p>
+                <div className="form-error">
                     {error}
-                </p>
+                </div>
 
             )}
 
 
-            <input
-
-                name="name"
-
-                placeholder="Name"
-
-                value={student.name}
-
-                onChange={handleChange}
-
-            />
-
-
-            <input
-
-                name="email"
-
-                placeholder="Email"
-
-                type="email"
-
-                value={student.email}
-
-                onChange={handleChange}
-
-            />
-
-
-            <input
-
-                name="course"
-
-                placeholder="Course"
-
-                value={student.course}
-
-                onChange={handleChange}
-
-            />
-
-
-            <button
-
-                type="submit"
-
-                disabled={loading}
-
+            <form
+                onSubmit={handleSubmit}
+                className="student-form"
             >
 
-                {loading
+                <div className="form-field">
 
-                    ? "Saving..."
+                    <label htmlFor="name">
+                        Student Name
+                    </label>
 
-                    : selectedStudent
+                    <input
+                        id="name"
+                        name="name"
+                        type="text"
+                        placeholder="Enter student name"
+                        value={student.name}
+                        onChange={handleChange}
+                        disabled={loading}
+                    />
 
-                        ? "Update"
-
-                        : "Save"}
-
-            </button>
+                </div>
 
 
-            {selectedStudent && (
+                <div className="form-field">
 
-                <button
+                    <label htmlFor="email">
+                        Email Address
+                    </label>
 
-                    type="button"
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="student@example.com"
+                        value={student.email}
+                        onChange={handleChange}
+                        disabled={loading}
+                    />
 
-                    onClick={handleCancel}
+                </div>
 
-                    disabled={loading}
 
-                >
+                <div className="form-field">
 
-                    Cancel
+                    <label htmlFor="course">
+                        Course
+                    </label>
 
-                </button>
+                    <input
+                        id="course"
+                        name="course"
+                        type="text"
+                        placeholder="Enter course name"
+                        value={student.course}
+                        onChange={handleChange}
+                        disabled={loading}
+                    />
 
-            )}
+                </div>
 
-        </form>
+
+                <div className="form-actions">
+
+                    <button
+                        type="submit"
+                        className="save-btn"
+                        disabled={loading}
+                    >
+
+                        {loading
+                            ? "Saving..."
+                            : selectedStudent
+                                ? "Update Student"
+                                : "Add Student"}
+
+                    </button>
+
+
+                    {selectedStudent && (
+
+                        <button
+                            type="button"
+                            className="cancel-btn"
+                            onClick={handleCancel}
+                            disabled={loading}
+                        >
+                            Cancel
+                        </button>
+
+                    )}
+
+                </div>
+
+            </form>
+
+        </div>
 
     );
 
+
 }
 
-
 export default StudentForm;
-

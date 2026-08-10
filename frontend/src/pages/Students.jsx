@@ -24,12 +24,18 @@ function Students() {
     const [appliedSearch, setAppliedSearch] = useState("");
 
     const [selectedStudent, setSelectedStudent] = useState(null);
+
     const [loading, setLoading] = useState(false);
     const [deletingId, setDeletingId] = useState(null);
     const [error, setError] = useState("");
 
+    const [showForm, setShowForm] = useState(false);
 
+
+    // ================================
     // Logout
+    // ================================
+
     const handleLogout = () => {
 
         logoutUser();
@@ -39,7 +45,10 @@ function Students() {
     };
 
 
-    // Load students from Laravel API
+    // ================================
+    // Load students
+    // ================================
+
     const loadStudents = async (
         page = currentPage,
         searchValue = appliedSearch
@@ -96,7 +105,10 @@ function Students() {
     };
 
 
-    // Load students when page or search changes
+    // ================================
+    // Initial load
+    // ================================
+
     useEffect(() => {
 
         loadStudents(
@@ -107,65 +119,71 @@ function Students() {
     }, [currentPage, appliedSearch]);
 
 
+    // ================================
     // Delete student
+    // ================================
+
     const handleDelete = async (id) => {
 
         if (
-            confirm(
+            !window.confirm(
                 "Are you sure you want to delete this student?"
             )
         ) {
+            return;
+        }
 
-            try {
+        try {
 
-                setDeletingId(id);
+            setDeletingId(id);
 
-                setError("");
+            setError("");
 
-                await deleteStudent(id);
+            await deleteStudent(id);
 
-                await loadStudents(
-                    currentPage,
-                    appliedSearch
+            await loadStudents(
+                currentPage,
+                appliedSearch
+            );
+
+        }
+
+        catch (error) {
+
+            console.log(error);
+
+            if (error.response) {
+
+                setError(
+                    error.response.data.message ||
+                    "Failed to delete student."
                 );
 
             }
 
-            catch (error) {
+            else {
 
-                console.log(error);
-
-                if (error.response) {
-
-                    setError(
-                        error.response.data.message ||
-                        "Failed to delete student."
-                    );
-
-                }
-
-                else {
-
-                    setError(
-                        "Unable to connect to the server."
-                    );
-
-                }
+                setError(
+                    "Unable to connect to the server."
+                );
 
             }
 
-            finally {
+        }
 
-                setDeletingId(null);
+        finally {
 
-            }
+            setDeletingId(null);
 
         }
 
     };
 
 
+    // ================================
     // Search
+    // ================================
+
     const handleSearch = () => {
 
         setCurrentPage(1);
@@ -177,7 +195,10 @@ function Students() {
     };
 
 
+    // ================================
     // Clear search
+    // ================================
+
     const handleClear = () => {
 
         setSearchInput("");
@@ -189,7 +210,10 @@ function Students() {
     };
 
 
-    // Change page
+    // ================================
+    // Pagination
+    // ================================
+
     const handlePageChange = (page) => {
 
         if (
@@ -204,325 +228,692 @@ function Students() {
     };
 
 
+    // ================================
+    // Add student
+    // ================================
+
+    const handleAddStudent = () => {
+
+        setSelectedStudent(null);
+
+        setShowForm(true);
+
+    };
+
+
+    // ================================
+    // Edit student
+    // ================================
+
+    const handleEditStudent = (student) => {
+
+        setSelectedStudent(student);
+
+        setShowForm(true);
+
+    };
+
+
+    // ================================
+    // Close form
+    // ================================
+
+    const handleCloseForm = () => {
+
+        setShowForm(false);
+
+        setSelectedStudent(null);
+
+    };
+
+
     return (
 
-        <div>
-
-            <h1>
-                Student Management System
-            </h1>
+        <div className="dashboard">
 
 
-            {/* Logout */}
+            {/* =================================
+                HEADER
+            ================================= */}
 
-            <button onClick={handleLogout}>
-                Logout
-            </button>
+            <header className="dashboard-header">
 
+                <div className="header-brand">
 
-            {/* Student Form */}
+                    <div className="header-logo">
+                        🎓
+                    </div>
 
-            <StudentForm
+                    <div>
 
-                refreshStudents={() =>
-                    loadStudents(
-                        currentPage,
-                        appliedSearch
-                    )
-                }
+                        <h1>
+                            Student Management
+                        </h1>
 
-                selectedStudent={
-                    selectedStudent
-                }
+                        <span>
+                            Administration Dashboard
+                        </span>
 
-                clearSelectedStudent={() =>
-                    setSelectedStudent(null)
-                }
+                    </div>
 
-            />
-
-
-            <h2>
-                Student List
-            </h2>
-
-
-            {/* Search */}
-
-            <div>
-
-                <input
-
-                    type="text"
-
-                    placeholder="Search by name, email or course"
-
-                    value={searchInput}
-
-                    onChange={(e) =>
-                        setSearchInput(
-                            e.target.value
-                        )
-                    }
-
-                />
+                </div>
 
 
                 <button
-
-                    type="button"
-
-                    onClick={handleSearch}
-
+                    className="logout-button"
+                    onClick={handleLogout}
                 >
-                    Search
+
+                    <span>
+                        ⇥
+                    </span>
+
+                    Logout
 
                 </button>
 
-
-                <button
-
-                    type="button"
-
-                    onClick={handleClear}
-
-                >
-                    Clear
-
-                </button>
-
-            </div>
+            </header>
 
 
-            {/* Error */}
+            {/* =================================
+                MAIN CONTENT
+            ================================= */}
 
-            {error && (
-
-                <p>
-                    {error}
-                </p>
-
-            )}
+            <main className="dashboard-content">
 
 
-            {/* Students Table */}
+                {/* Page heading */}
 
-            <table
-                border="1"
-                cellPadding="10"
-            >
+                <div className="page-heading">
 
-                <thead>
+                    <div>
 
-                    <tr>
+                        <h2>
+                            Students
+                        </h2>
 
-                        <th>ID</th>
+                        <p>
+                            Manage student information and records.
+                        </p>
 
-                        <th>Name</th>
-
-                        <th>Email</th>
-
-                        <th>Course</th>
-
-                        <th>Action</th>
-
-                    </tr>
-
-                </thead>
+                    </div>
 
 
-                <tbody>
+                    <button
+                        className="add-student-button"
+                        onClick={handleAddStudent}
+                    >
 
-                    {loading ? (
+                        <span>
+                            +
+                        </span>
 
-                        <tr>
+                        Add Student
 
-                            <td colSpan="5">
-                                Loading students...
-                            </td>
+                    </button>
 
-                        </tr>
-
-                    )
-
-                        : students.length === 0 ? (
-
-                            <tr>
-
-                                <td colSpan="5">
-
-                                    {appliedSearch
-                                        ? "No matching students found."
-                                        : "No students found."}
-
-                                </td>
-
-                            </tr>
-
-                        )
-
-                            : (
-
-                                students.map((student) => (
-
-                                    <tr key={student.id}>
-
-                                        <td>
-                                            {student.id}
-                                        </td>
-
-                                        <td>
-                                            {student.name}
-                                        </td>
-
-                                        <td>
-                                            {student.email}
-                                        </td>
-
-                                        <td>
-                                            {student.course}
-                                        </td>
-
-                                        <td>
-
-                                            <button
-
-                                                onClick={() =>
-                                                    setSelectedStudent(
-                                                        student
-                                                    )
-                                                }
-
-                                            >
-                                                Edit
-                                            </button>
+                </div>
 
 
-                                            <button
+                {/* =================================
+                    STATISTICS
+                ================================= */}
 
-                                                onClick={() =>
-                                                    handleDelete(
-                                                        student.id
-                                                    )
-                                                }
+                <div className="stats-grid">
 
-                                                disabled={
-                                                    deletingId ===
-                                                    student.id
-                                                }
+                    <div className="stat-card">
 
-                                            >
+                        <div className="stat-icon">
+                            👨‍🎓
+                        </div>
 
-                                                {deletingId ===
-                                                    student.id
+                        <div>
 
-                                                    ? "Deleting..."
+                            <span>
+                                Students
+                            </span>
 
-                                                    : "Delete"}
+                            <strong>
+                                {loading
+                                    ? "..."
+                                    : students.length}
+                            </strong>
 
-                                            </button>
+                        </div>
+
+                    </div>
+
+
+                    <div className="stat-card">
+
+                        <div className="stat-icon">
+                            📄
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Current Page
+                            </span>
+
+                            <strong>
+                                {currentPage}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="stat-card">
+
+                        <div className="stat-icon">
+                            📚
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Total Pages
+                            </span>
+
+                            <strong>
+                                {totalPages}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {/* =================================
+                    STUDENT TABLE CARD
+                ================================= */}
+
+                <section className="students-card">
+
+
+                    {/* Search header */}
+
+                    <div className="students-card-header">
+
+                        <div>
+
+                            <h3>
+                                Student Records
+                            </h3>
+
+                            <p>
+                                Search and manage student information.
+                            </p>
+
+                        </div>
+
+
+                        <div className="search-container">
+
+                            <div className="search-input-wrapper">
+
+                                <span>
+                                    🔎
+                                </span>
+
+                                <input
+                                    type="text"
+                                    placeholder="Search students..."
+                                    value={searchInput}
+                                    onChange={(e) =>
+                                        setSearchInput(
+                                            e.target.value
+                                        )
+                                    }
+                                    onKeyDown={(e) => {
+
+                                        if (
+                                            e.key === "Enter"
+                                        ) {
+
+                                            handleSearch();
+
+                                        }
+
+                                    }}
+                                />
+
+                            </div>
+
+
+                            <button
+                                className="search-button"
+                                onClick={handleSearch}
+                            >
+                                Search
+                            </button>
+
+
+                            {appliedSearch && (
+
+                                <button
+                                    className="clear-button"
+                                    onClick={handleClear}
+                                >
+                                    Clear
+                                </button>
+
+                            )}
+
+                        </div>
+
+                    </div>
+
+
+                    {/* Error */}
+
+                    {error && (
+
+                        <div className="dashboard-error">
+
+                            <span>
+                                !
+                            </span>
+
+                            {error}
+
+                        </div>
+
+                    )}
+
+
+                    {/* =================================
+                        TABLE
+                    ================================= */}
+
+                    <div className="table-wrapper">
+
+                        <table className="students-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        ID
+                                    </th>
+
+                                    <th>
+                                        Student
+                                    </th>
+
+                                    <th>
+                                        Email
+                                    </th>
+
+                                    <th>
+                                        Course
+                                    </th>
+
+                                    <th>
+                                        Actions
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+
+                                {loading ? (
+
+                                    <tr>
+
+                                        <td
+                                            colSpan="5"
+                                            className="table-message"
+                                        >
+
+                                            <div className="table-loader">
+
+                                                <span className="spinner"></span>
+
+                                                Loading students...
+
+                                            </div>
 
                                         </td>
 
                                     </tr>
 
-                                ))
-
-                            )}
-
-                </tbody>
-
-            </table>
+                                )
 
 
-            {/* Pagination */}
+                                    : students.length === 0 ? (
 
-            <div>
+                                        <tr>
 
-                <button
+                                            <td
+                                                colSpan="5"
+                                                className="table-message"
+                                            >
 
-                    type="button"
+                                                <div className="empty-state">
 
-                    onClick={() =>
-                        handlePageChange(
-                            currentPage - 1
-                        )
-                    }
+                                                    <div>
+                                                        📋
+                                                    </div>
 
-                    disabled={
-                        currentPage === 1
-                    }
+                                                    <h4>
+                                                        No students found
+                                                    </h4>
 
+                                                    <p>
+
+                                                        {appliedSearch
+                                                            ? "Try changing your search."
+                                                            : "Add your first student to get started."}
+
+                                                    </p>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                    )
+
+
+                                        : (
+
+                                            students.map(
+                                                (student) => (
+
+                                                    <tr
+                                                        key={
+                                                            student.id
+                                                        }
+                                                    >
+
+                                                        <td>
+
+                                                            <span className="student-id">
+
+                                                                #
+                                                                {student.id}
+
+                                                            </span>
+
+                                                        </td>
+
+
+                                                        <td>
+
+                                                            <div className="student-name">
+
+                                                                <div className="student-avatar">
+
+                                                                    {student.name
+                                                                        ?.charAt(
+                                                                            0
+                                                                        )
+                                                                        ?.toUpperCase()}
+
+                                                                </div>
+
+                                                                <strong>
+
+                                                                    {student.name}
+
+                                                                </strong>
+
+                                                            </div>
+
+                                                        </td>
+
+
+                                                        <td>
+
+                                                            {student.email}
+
+                                                        </td>
+
+
+                                                        <td>
+
+                                                            <span className="course-badge">
+
+                                                                {student.course}
+
+                                                            </span>
+
+                                                        </td>
+
+
+                                                        <td>
+
+                                                            <div className="action-buttons">
+
+                                                                <button
+                                                                    className="edit-button"
+                                                                    onClick={() =>
+                                                                        handleEditStudent(
+                                                                            student
+                                                                        )
+                                                                    }
+                                                                >
+
+                                                                    ✏️
+
+                                                                    <span>
+                                                                        Edit
+                                                                    </span>
+
+                                                                </button>
+
+
+                                                                <button
+                                                                    className="delete-button"
+                                                                    onClick={() =>
+                                                                        handleDelete(
+                                                                            student.id
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        deletingId ===
+                                                                        student.id
+                                                                    }
+                                                                >
+
+                                                                    {deletingId ===
+                                                                        student.id
+                                                                        ? "..."
+                                                                        : "🗑️"}
+
+                                                                    {deletingId !==
+                                                                        student.id && (
+                                                                            <span>
+                                                                                Delete
+                                                                            </span>
+                                                                        )}
+
+                                                                </button>
+
+                                                            </div>
+
+                                                        </td>
+
+                                                    </tr>
+
+                                                )
+                                            )
+
+                                        )}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    {/* =================================
+                        PAGINATION
+                    ================================= */}
+
+                    {!loading &&
+                        students.length > 0 && (
+
+                            <div className="pagination-container">
+
+                                <div className="page-info">
+
+                                    Page{" "}
+                                    <strong>
+                                        {currentPage}
+                                    </strong>{" "}
+                                    of{" "}
+                                    <strong>
+                                        {totalPages}
+                                    </strong>
+
+                                </div>
+
+
+                                <div className="pagination">
+
+                                    <button
+                                        onClick={() =>
+                                            handlePageChange(
+                                                currentPage -
+                                                1
+                                            )
+                                        }
+                                        disabled={
+                                            currentPage ===
+                                            1
+                                        }
+                                    >
+                                        ←
+                                    </button>
+
+
+                                    {Array.from(
+                                        {
+                                            length:
+                                                totalPages
+                                        },
+                                        (_, index) => (
+
+                                            <button
+                                                key={
+                                                    index +
+                                                    1
+                                                }
+                                                className={
+                                                    currentPage ===
+                                                        index +
+                                                        1
+                                                        ? "active"
+                                                        : ""
+                                                }
+                                                onClick={() =>
+                                                    handlePageChange(
+                                                        index +
+                                                        1
+                                                    )
+                                                }
+                                            >
+
+                                                {index +
+                                                    1}
+
+                                            </button>
+
+                                        )
+                                    )}
+
+
+                                    <button
+                                        onClick={() =>
+                                            handlePageChange(
+                                                currentPage +
+                                                1
+                                            )
+                                        }
+                                        disabled={
+                                            currentPage ===
+                                            totalPages
+                                        }
+                                    >
+                                        →
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        )}
+
+                </section>
+
+            </main>
+
+
+            {/* =================================
+                ADD / EDIT MODAL
+            ================================= */}
+
+            {showForm && (
+
+                <div
+                    className="modal-overlay"
+                    onClick={handleCloseForm}
                 >
-                    Previous
-                </button>
 
-
-                {Array.from(
-
-                    {
-                        length: totalPages
-                    },
-
-                    (_, index) => (
+                    <div
+                        className="student-modal"
+                        onClick={(e) =>
+                            e.stopPropagation()
+                        }
+                    >
 
                         <button
-
-                            type="button"
-
-                            key={index + 1}
-
-                            onClick={() =>
-                                handlePageChange(
-                                    index + 1
-                                )
-                            }
-
-                            disabled={
-                                currentPage ===
-                                index + 1
-                            }
-
+                            className="modal-close"
+                            onClick={handleCloseForm}
                         >
-
-                            {index + 1}
-
+                            ×
                         </button>
 
-                    )
 
-                )}
+                        <StudentForm
 
+                            refreshStudents={async () => {
 
-                <button
+                                await loadStudents(
+                                    currentPage,
+                                    appliedSearch
+                                );
 
-                    type="button"
+                            }}
 
-                    onClick={() =>
-                        handlePageChange(
-                            currentPage + 1
-                        )
-                    }
+                            selectedStudent={
+                                selectedStudent
+                            }
 
-                    disabled={
-                        currentPage === totalPages ||
-                        totalPages === 0
-                    }
+                            clearSelectedStudent={
+                                handleCloseForm
+                            }
 
-                >
-                    Next
-                </button>
+                        />
 
-            </div>
+                    </div>
 
+                </div>
 
-            {/* Page Information */}
-
-            <p>
-
-                Page {currentPage} of {totalPages}
-
-            </p>
+            )}
 
         </div>
 
